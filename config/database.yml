@@ -7,13 +7,13 @@ default: &default
 
 development:
   <<: *default
-  database: overthrow_development
+  database: chain_development
 
 test:
   <<: *default
-  database: overthrow_test
+  database: chain_test
 
 production:
   <<: *default
-  database: overthrow_production
-  password: <%= ENV['OVERTHROW_DATABASE_PASSWORD'] %>
+  database: chain_production
+  password: <%= ENV['CHAIN_DATABASE_PASSWORD'] %>

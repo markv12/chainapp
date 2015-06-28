@@ -1,0 +1,100 @@
+<script>
+    var app = angular.module('chain', []);
+
+    app.controller('ChainController', ['$scope', '$http', function ($scope, $http) {
+      $scope.updating = false;
+      $scope.edit_mode = false;
+
+      $scope.enterEditMode = function(){
+        $scope.edit_mode = true;
+      }
+      $scope.exitEditMode = function(){
+        $scope.edit_mode = false;
+      }
+
+      $scope.deleteChain = function(chain){
+        var deleteConfirm = confirm("Are you sure you want to delete chain: \"" + chain.name + "\"?");
+        if (deleteConfirm === true) {
+          var request = '/chains/delete_chain/' + chain.id + "/<%= current_user.id %>";
+          $http.get(request).
+          success(function(data, status, headers, config) {
+            $scope.chains.splice($scope.chains.indexOf(chain), 1);
+          })
+        }
+      }
+
+      $scope.chain_check_in = function() {
+      };
+      $scope.getNumber = function(num) {
+          return new Array(num);
+      }
+
+      $scope.initChainDisplayInfo = function(chain){
+        chain.length = $scope.chainLength(chain);
+        chain.nonCheckedInLength = $scope.daysSinceLastCheckIn(chain);
+      }
+
+      $scope.chainLength = function(chain){
+        start_date = new Date(chain.start_date);
+        last_check_in = new Date(chain.last_check_in);
+        return daydiff(start_date, last_check_in);
+      }
+
+      $scope.daysSinceLastCheckIn = function(chain){
+        last_check_in = new Date(chain.last_check_in);
+        return daydiff(last_check_in, new Date());
+      }
+
+      $scope.checkIn = function(chain){
+        var request = '/chains/checkin/' + chain.id + "/<%= current_user.id %>";
+        $http.get(request).
+        success(function(data, status, headers, config) {
+          chain.last_check_in = new Date();
+          $scope.initChainDisplayInfo(chain);
+        }).
+        error(function(data, status, headers, config) {
+          alert("error checking in");
+        });
+      }
+
+      $scope.checkedIn = function(chain){
+        if (chain.last_check_in !== null){
+          var offsetTime = new Date(chain.last_check_in);
+          var last_check_in = new Date(offsetTime.getTime() + offsetTime.getTimezoneOffset() * 60 * 1000);
+          return (last_check_in.getDate() === new Date().getDate());
+        }
+        else{
+          return false;
+        }
+      }
+      function daydiff(first, second) {
+        return Math.floor((second-first)/(86400000));
+      }
+      $scope.chains = <%= current_user.chains.to_json.html_safe %>;
+
+    }]);
+</script>
+  <div ng-app="chain">
+    <div ng-controller="ChainController">
+      <%= render partial: 'chains/form', locals: {chain: @empty_chain}%>
+      <br />
+      <br />
+      <span ng-repeat="chain in chains" ng-init="initChainDisplayInfo(chain)" class="row">
+        <span class="chainTitle columns large-2">
+          <i class="fa fa-times-circle" ng-show="edit_mode" ng-click="deleteChain(chain)"></i>
+          {{chain.name}}
+        </span>
+        <span class="columns large-10">
+          <span class="chainLengthIndicator" ng-repeat="c in getNumber(chain.length) track by $index">
+          </span>
+          <span class="uncheckedIndicator" ng-repeat="c in getNumber(chain.nonCheckedInLength) track by $index">
+          </span>
+          <span class="uncheckedIndicator" ng-hide="checkedIn(chain)" ng-click="checkIn(chain)">
+          </span>
+          <span class="chainLengthIndicator" ng-show="checkedIn(chain)">
+          </span>
+        </span>
+        <br/>
+      </span>
+    </div>
+  </div>

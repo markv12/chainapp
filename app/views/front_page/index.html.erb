@@ -1,11 +1,11 @@
 <%= javascript_include_tag 'impulse.min'%>
 
 <% if current_user %>
-  <p>Logged In!</p>
+  <%= render partial: 'chains/chain_list', locals: {chains: @chains}%>
 <% else %>
   <div class="main_content centered">
     <br/>
-    <p style="font-size:111px" id="main_title">Overthrow</p>
+    <p style="font-size:111px" id="main_title">ChainApp</p>
   </div>
 
   <script type="text/javascript">

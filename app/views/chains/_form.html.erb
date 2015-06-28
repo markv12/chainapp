@@ -1,0 +1,65 @@
+<div class="columns large-centered large-8" style="height:19px;">
+  <span id="buttonPanel">
+    <input type=button class="button" id="newChainButton" value='New Chain' onclick="showChainForm()" />
+    <input type=button class="button" id="editChainsButton" value='Edit Chains' ng-click="enterEditMode()" ng-hide="edit_mode"/>
+    <input type=button class="button" id="stopEditingButton" value='Stop Editing' ng-click="exitEditMode()" ng-show="edit_mode"/>
+  </span>
+</div>
+<div class="columns large-centered large-8" style="display:none;" id="newChainForm">
+  <%= form_for(chain, url: chains_path) do |form| %>
+    <% if chain.errors.any? %>
+      <ul>
+        <% chain.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    <% end %>
+    <p>
+      <%= form.label :name %>
+      <%= form.text_field :name, :required => "required" %>
+    </p>
+
+    <p>
+      <%= form.label :description %>
+      <%= form.text_field :description %>
+    </p>
+<hr/>
+    <p>
+      <%= form.label :start_date %>
+      <%= form.date_select :start_date, :order => [:day, :month, :year], :end_year => Date.today.year %>
+    </p>
+    <%= form.submit 'Create', class: "button"%>
+    <a href="#" onclick="hideChainForm()">&nbsp;&nbsp;cancel</a>
+  <% end %>
+
+</div>
+
+<style type="text/css">
+  #chain_start_date_1i{
+  width: 100px;
+  text-indent: 10px;
+}
+
+#chain_start_date_2i {
+  width: 150px;
+  text-indent: 10px;
+}
+
+#chain_start_date_3i {
+  width: 90px;
+  text-indent: 10px;
+}
+</style>
+
+<script type="text/javascript">
+  function showChainForm(){
+    $("#newChainForm").show("blind", 500);
+    $("#buttonPanel").hide();
+  }
+  function hideChainForm(){
+    $("#newChainForm").hide("blind", 450);
+    setTimeout(function() {
+      $("#buttonPanel").show();
+    }, 500);
+  }
+</script>
