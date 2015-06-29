@@ -23,8 +23,6 @@
         }
       }
 
-      $scope.chain_check_in = function() {
-      };
       $scope.getNumber = function(num) {
           return new Array(num);
       }
@@ -41,7 +39,8 @@
       }
 
       $scope.daysSinceLastCheckIn = function(chain){
-        last_check_in = new Date(chain.last_check_in);
+        var offsetTime = new Date(chain.last_check_in);
+        var last_check_in = new Date(offsetTime.getTime() + offsetTime.getTimezoneOffset() * 60 * 1000);
         return daydiff(last_check_in, new Date());
       }
 
