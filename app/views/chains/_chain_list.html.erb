@@ -29,26 +29,18 @@
 
       $scope.initChainDisplayInfo = function(chain){
         chain.length = $scope.chainLength(chain);
-        chain.nonCheckedInLength = $scope.daysSinceLastCheckIn(chain);
       }
 
       $scope.chainLength = function(chain){
-        start_date = new Date(chain.start_date);
-        last_check_in = new Date(chain.last_check_in);
-        return daydiff(start_date, last_check_in);
-      }
-
-      $scope.daysSinceLastCheckIn = function(chain){
-        var offsetTime = new Date(chain.last_check_in);
-        var last_check_in = new Date(offsetTime.getTime() + offsetTime.getTimezoneOffset() * 60 * 1000);
-        return daydiff(last_check_in, new Date());
+        start_date = new Date(chain.start_date).getTime();
+        return daydiff(start_date, new Date().getTime());
       }
 
       $scope.checkIn = function(chain){
         var request = '/chains/checkin/' + chain.id + "/<%= current_user.id %>";
         $http.get(request).
         success(function(data, status, headers, config) {
-          chain.last_check_in = new Date();
+          chain.last_check_in = new Date() + new Date().getTimezoneOffset()*60000;;
           $scope.initChainDisplayInfo(chain);
         }).
         error(function(data, status, headers, config) {
@@ -58,16 +50,16 @@
 
       $scope.checkedIn = function(chain){
         if (chain.last_check_in !== null){
-          var offsetTime = new Date(chain.last_check_in);
-          var last_check_in = new Date(offsetTime.getTime() + offsetTime.getTimezoneOffset() * 60 * 1000);
-          return (last_check_in.getDate() === new Date().getDate());
+          var offsetTime = new Date(chain.last_check_in).getTime();
+          return (daydiff(offsetTime, new Date().getTime()) <= 1);
         }
         else{
           return false;
         }
       }
       function daydiff(first, second) {
-        return Math.floor((second-first)/(86400000));
+        var result = Math.floor((second-first)/(86400000));
+        return result >=0 ? result : 0;
       }
       $scope.chains = <%= current_user.chains.to_json.html_safe %>;
 
@@ -85,8 +77,6 @@
         </span>
         <span class="columns large-10">
           <span class="chainLengthIndicator" ng-repeat="c in getNumber(chain.length) track by $index">
-          </span>
-          <span class="uncheckedIndicator" ng-repeat="c in getNumber(chain.nonCheckedInLength) track by $index">
           </span>
           <span class="uncheckedIndicator" ng-hide="checkedIn(chain)" ng-click="checkIn(chain)">
           </span>
